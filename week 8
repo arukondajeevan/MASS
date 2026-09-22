@@ -1,0 +1,74 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+
+#define NO_OF_PACKETS 5
+
+int main() {
+    int bucket_size, output_rate, bucket_content = 0;
+    int incoming_packets[NO_OF_PACKETS] = {300, 700, 200, 500, 100};
+    int i, bytes_to_send;
+
+    // 1. Get user configuration
+    printf("Enter Bucket Size (Capacity): ");
+    if (scanf("%d", &bucket_size) != 1) return 1;
+
+    printf("Enter Output Rate (Leaking Rate per second): ");
+    if (scanf("%d", &output_rate) != 1) return 1;
+
+    printf("\n--- Simulating Leaky Bucket Algorithm ---\n\n");
+    printf("Sec\tIncoming\tBucket Status\tTransmitted\tDropped\t\tRemaining\n");
+    printf("---------------------------------------------------------------------------------\n");
+
+    // 2. Process incoming bursty packets
+    for (i = 0; i < NO_OF_PACKETS; i++) {
+        int incoming = incoming_packets[i];
+        int dropped = 0;
+
+        // Check for bucket overflow
+        if (incoming <= (bucket_size - bucket_content)) {
+            bucket_content += incoming;
+        } else {
+            dropped = incoming - (bucket_size - bucket_content);
+            bucket_content = bucket_size; // Bucket becomes completely full
+        }
+
+        // Determine how much data to leak/transmit
+        if (bucket_content >= output_rate) {
+            bytes_to_send = output_rate;
+        } else {
+            bytes_to_send = bucket_content;
+        }
+
+        bucket_content -= bytes_to_send;
+
+        // Display status for the current second
+        printf("%d\t%d\t\t%d\t\t%d\t\t%d\t\t%d\n", 
+               i + 1, incoming, bucket_content + bytes_to_send, bytes_to_send, dropped, bucket_content);
+        
+        sleep(1); // Simulate 1-second interval
+    }
+
+    // 3. Empty the remaining data in the bucket after incoming stream stops
+    i++;
+    while (bucket_content > 0) {
+        if (bucket_content >= output_rate) {
+            bytes_to_send = output_rate;
+        } else {
+            bytes_to_send = bucket_content;
+        }
+
+        bucket_content -= bytes_to_send;
+
+        printf("%d\t0\t\t%d\t\t%d\t\t0\t\t%d\n", 
+               i, bucket_content + bytes_to_send, bytes_to_send, bucket_content);
+        
+        i++;
+        sleep(1);
+    }
+
+    printf("---------------------------------------------------------------------------------\n");
+    printf("All packets processed. Bucket is empty.\n");
+
+    return 0;
+}
