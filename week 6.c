@@ -1,5 +1,4 @@
 #include<stdio.h>
-// Structure to represent the routing table of each router
 struct RoutingTable
  {
     unsigned distance[20];  // Distance to each destination node
@@ -8,33 +7,29 @@ struct RoutingTable
 rt[10];
 int main() 
 {
-    int costMatrix[20][20];  // Cost matrix input by user
-    int numNodes;            // Number of routers/nodes in the network
-    int i, j, k;             // Loop counters
-    int updated;             // Flag to check if any update is made in the routing table
-    // Read the number of routers
+    int costMatrix[20][20];  
+    int numNodes;            
+    int i, j, k;             
+    int updated;
     printf("\nEnter the number of nodes (routers): ");
     scanf("%d", &numNodes);
-    // Read the cost matrix
     printf("\nEnter the cost matrix:\n");
     for (i = 0; i < numNodes; i++) 
      {
         for (j = 0; j < numNodes; j++) 
          {
             scanf("%d", &costMatrix[i][j]);
-            // Distance from a node to itself is 0
             if (i == j) 
              {
                 costMatrix[i][j] = 0;
             }
 
-            // Initialize routing table
-            rt[i].distance[j] = costMatrix[i][j]; // Initial distance
-            rt[i].nextHop[j] = j;                // Initial next hop (direct connection)
+            rt[i].distance[j] = costMatrix[i][j]; 
+            rt[i].nextHop[j] = j;                
         }
     }
 
-    // Apply Distance Vector Routing algorithm (Bellman-Ford logic)
+    
     do {
         updated = 0;  // Assume no updates
         for (i = 0; i < numNodes; i++) 
@@ -42,19 +37,17 @@ int main()
             for (j = 0; j < numNodes; j++) 
 {
                 for (k = 0; k < numNodes; k++) 
-    {
-                    // Check if the path from i to j via k is shorter
+   {
                     if (rt[i].distance[j] > costMatrix[i][k] + rt[k].distance[j]) 
       {
                         rt[i].distance[j] = costMatrix[i][k] + rt[k].distance[j];
-                        rt[i].nextHop[j] = k; // Update next hop
-                        updated = 1;          // Mark that an update occurred
+                        rt[i].nextHop[j] = k;
+                        updated = 1;        
                     }
                 }
             }
         }
-    } while (updated);  // Repeat until no updates
-    // Print final routing tables
+    } while (updated);
     for (i = 0; i < numNodes; i++) 
      {
         printf("\nRouting Table for Router %d:\n", i + 1);
